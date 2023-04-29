@@ -130,7 +130,20 @@ const App = () => {
               arcPadding={0.02}
             />
           </Col>
-        </Row>          
+          <Col xs={12} lg={6}>
+            <h6>Ranged GaugeChart</h6>
+            <GaugeChart
+              id="gauge-chart10"
+							style={chartStyle}
+              animate={false}
+              // colors={['#5BE12C', '#F5CD19', '#EA4228']}
+              value={39}
+              minValue={20}
+              maxValue={40}
+              arcPadding={0.02}
+            />
+          </Col>
+        </Row>  
       </Container>
     </>
   )

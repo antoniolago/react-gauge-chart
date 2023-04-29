@@ -144,6 +144,9 @@ const GaugeChart = (props) => {
     props.arcsLength,
     props.colors,
     props.percent,
+    props.value,
+    props.minValue,
+    props.maxValue,
     props.needleColor,
     props.needleBaseColor,
   ]);
@@ -208,6 +211,10 @@ GaugeChart.defaultProps = {
   formatTextValue: null,
   fontSize: null,
   animateDuration: 3000,
+  //New value behavior
+  value: null,
+  minValue: 0,
+  maxValue: 100,
 };
 
 GaugeChart.propTypes = {
@@ -218,6 +225,9 @@ GaugeChart.propTypes = {
   cornerRadius: PropTypes.number,
   nrOfLevels: PropTypes.number,
   percent: PropTypes.number,
+  value: PropTypes.number,
+  minValue: PropTypes.number,
+  maxValue: PropTypes.number,
   arcPadding: PropTypes.number,
   arcWidth: PropTypes.number,
   arcsLength: PropTypes.array,
@@ -232,7 +242,15 @@ GaugeChart.propTypes = {
   animateDuration: PropTypes.number,
   animDelay: PropTypes.number,
 };
-
+const calculatePercentage = (minValue, maxValue, value) => {
+  if (value < minValue) {
+    return 0;
+  } else if (value > maxValue) {
+    return 100;
+  } else {
+    return ((value - minValue) / (maxValue - minValue));
+  }
+}
 // This function update arc's datas when component is mounting or when one of arc's props is updated
 const setArcData = (props, nbArcsToDisplay, colorArray, arcData) => {
   // We have to make a decision about number of arcs to display
@@ -240,6 +258,7 @@ const setArcData = (props, nbArcsToDisplay, colorArray, arcData) => {
   nbArcsToDisplay.current = props.arcsLength
     ? props.arcsLength.length
     : props.nrOfLevels;
+
 
   //Check if the number of colors equals the number of levels
   //Otherwise make an interpolation
@@ -251,6 +270,7 @@ const setArcData = (props, nbArcsToDisplay, colorArray, arcData) => {
   //The data that is used to create the arc
   // Each arc could have hiw own value width arcsLength prop
   arcData.current = [];
+
   for (var i = 0; i < nbArcsToDisplay.current; i++) {
     var arcDatum = {
       value:
@@ -367,13 +387,15 @@ const drawNeedle = (
   outerRadius,
   g
 ) => {
-  const { percent, needleColor, needleBaseColor, hideText, animate } = props;
+  const { percent, needleColor, needleBaseColor, hideText, animate, value, minValue, maxValue } = props;
   var needleRadius = 15 * (width.current / 500), // Make the needle radius responsive
     centerPoint = [0, -needleRadius / 2];
   //Draw the triangle
   //var pathStr = `M ${leftPoint[0]} ${leftPoint[1]} L ${topPoint[0]} ${topPoint[1]} L ${rightPoint[0]} ${rightPoint[1]}`;
-  const prevPercent = prevProps ? prevProps.percent : 0;
-  var pathStr = calculateRotation(prevPercent || percent, outerRadius, width);
+  var prevPercent = prevProps ? prevProps.percent : 0;
+  if(prevProps?.value) prevPercent = calculatePercentage(minValue, maxValue, prevProps.value);
+  var percentValue = value ? calculatePercentage(minValue, maxValue, value) : percent;
+  var pathStr = calculateRotation(prevPercent || percentValue, outerRadius, width);
   needle.current.append("path").attr("d", pathStr).attr("fill", needleColor);
   //Add a circle at the bottom of needle
   needle.current
@@ -383,7 +405,7 @@ const drawNeedle = (
     .attr("r", needleRadius)
     .attr("fill", needleBaseColor);
   if (!hideText) {
-    addText(percent, props, outerRadius, width, g);
+    addText(percentValue, props, outerRadius, width, g);
   }
   //Rotate the needle
   if (!resize && animate) {
@@ -393,7 +415,7 @@ const drawNeedle = (
       .ease(easeElastic)
       .duration(props.animateDuration)
       .tween("progress", function () {
-        const currentPercent = interpolateNumber(prevPercent, percent);
+        const currentPercent = interpolateNumber(prevPercent, percentValue);
         return function (percentOfPercent) {
           const progress = currentPercent(percentOfPercent);
           return container.current
@@ -404,7 +426,7 @@ const drawNeedle = (
   } else {
     container.current
       .select(`.needle path`)
-      .attr("d", calculateRotation(percent, outerRadius, width));
+      .attr("d", calculateRotation(percentValue, outerRadius, width));
   }
 };
 
@@ -438,9 +460,10 @@ const percentToRad = (percent) => {
 const addText = (percentage, props, outerRadius, width, g) => {
   const { formatTextValue, fontSize } = props;
   var textPadding = 20;
-  const text = formatTextValue
-    ? formatTextValue(floatingNumber(percentage))
-    : floatingNumber(percentage) + "%";
+  var textLabel = props.value ? props.value : formatTextValue
+                                                ? formatTextValue(floatingNumber(percentage))
+                                                : floatingNumber(percentage) + "%"
+  const text = textLabel;
   g.current
     .append("g")
     .attr("class", "text-group")
