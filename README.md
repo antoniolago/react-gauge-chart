@@ -25,7 +25,8 @@ Check the demo below for live examples of the charts
 ```jsx
 <GaugeChart id="gauge-chart2" 
   nrOfLevels={20} 
-  percent={0.86} 
+  percent
+  value={86} 
 />
 ```
 
@@ -36,7 +37,7 @@ Check the demo below for live examples of the charts
   nrOfLevels={30} 
   colors={["#FF5F6D", "#FFC371"]} 
   arcWidth={0.3} 
-  percent={0.37} 
+  value={37} 
 />
 ```
 
@@ -47,7 +48,7 @@ Check the demo below for live examples of the charts
   nrOfLevels={10} 
   arcPadding={0.1} 
   cornerRadius={3} 
-  percent={0.6} 
+  value={60} 
 />
 ```
 
@@ -58,7 +59,7 @@ Check the demo below for live examples of the charts
   nrOfLevels={420}
   arcsLength={[0.3, 0.5, 0.2]}
   colors={['#5BE12C', '#F5CD19', '#EA4228']}
-  percent={0.37}
+  value={37}
   arcPadding={0.02}
 />
 ```
@@ -69,7 +70,7 @@ Check the demo below for live examples of the charts
 <GaugeChart id="gauge-chart6" 
   animate={false} 
   nrOfLevels={15} 
-  percent={0.56} 
+  value={56} 
   needleColor="#345243" 
 />
 ```
@@ -104,7 +105,9 @@ The props for the chart:
 | marginInPercent | PropTypes.number            | Margin for the chart inside the containing SVG element         | 0.05                   |
 | cornerRadius    | PropTypes.number            | Corner radius for the elements in the chart                    | 6                      |
 | nrOfLevels      | PropTypes.number            | The number of elements displayed in the arc                    | 3                      |
-| percent         | PropTypes.number            | The number where the pointer should point to (between 0 and 1) | 0.4                    |
+| minValue        | PropTypes.number            | Minimum value                                                  | 0                      |
+| maxValue        | PropTypes.number            | Maximum value                                                  | 100                    |
+| value           | PropTypes.number            | Value between min/max value                                    | 50                     |
 | arcPadding      | PropTypes.number            | The distance between the elements in the arc                   | 0.05                   |
 | arcWidth        | PropTypes.number            | The thickness of the arc                                       | 0.2                    |
 | colors          | PropTypes.array             | An array of colors in HEX format displayed in the arc          | ["#00FF00", "#FF0000"] |
